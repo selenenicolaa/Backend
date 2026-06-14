@@ -225,6 +225,7 @@ class Usuarios(models.Model):
     contrasena = models.CharField(blank=True, null=True)
     direccion = models.CharField(blank=True, null=True)
     rol = models.BooleanField(blank=True, null=True)
+    id_restaurante = models.ForeignKey(Restaurantes, models.DO_NOTHING, db_column='id_restaurante', blank=True, null=True)
 
     class Meta:
         managed = False
