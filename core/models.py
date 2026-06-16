@@ -77,6 +77,18 @@ class AuthUserUserPermissions(models.Model):
         unique_together = (('user', 'permission'),)
 
 
+class Categoria(models.Model):
+    id_categoria = models.BigAutoField(db_column='id_Categoria', primary_key=True)  # Field name made lowercase.
+    nombre = models.CharField()
+    id_restaurante = models.ForeignKey('Restaurantes', models.DO_NOTHING, db_column='id_restaurante',blank=True, null=True, 
+        #se agrega esto para que no choque con el atributo de categoria de restaurante
+        related_name='categorias')
+  
+    class Meta:
+        managed = False
+        db_table = 'categoria'
+
+
 class DetallePedido(models.Model):
     id_detalle = models.BigAutoField(primary_key=True)
     cantidad = models.FloatField()
@@ -184,6 +196,7 @@ class Productos(models.Model):
     imagen_url = models.CharField(blank=True, null=True)
     disponible = models.BooleanField(blank=True, null=True)
     id_restaurante = models.ForeignKey('Restaurantes', models.DO_NOTHING, db_column='id_restaurante', blank=True, null=True)
+    id_categoria = models.ForeignKey(Categoria, models.DO_NOTHING, db_column='id_Categoria', blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False

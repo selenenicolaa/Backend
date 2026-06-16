@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from .models import Productos, Usuarios, Pedidos
+from .models import Productos, Usuarios, Pedidos, Categoria
 
 #este DEF lo que hace es leer el token JWT del header de la peticion
 #y devuelve el id_restaurante que esta guardado dentro del token. 
@@ -185,3 +185,114 @@ class PedidosView(APIView):
         pedido.estado = request.data.get('estado', pedido.estado)
         pedido.save()
         return Response({'id_pedido': pedido.id_pedido, 'estado': pedido.estado})
+   
+   
+    #lista de categorias
+class CategoriasView(APIView):
+
+    def get(self, request):
+
+        id_restaurante = get_restaurante_from_token(request)
+
+        categorias = Categoria.objects.filter(
+            id_restaurante=id_restaurante
+        )
+
+        data = [
+            {
+                "id_categoria": c.id_categoria,
+                "nombre": c.nombre
+            }
+            for c in categorias
+        ]
+
+        return Response(data)
+#crear categorias
+def post(self, request):
+
+    id_restaurante = get_restaurante_from_token(request)
+
+    nombre = request.data.get("nombre")
+
+    categoria = Categoria.objects.create(
+        nombre=nombre,
+        id_restaurante_id=id_restaurante
+    )
+
+    return Response(
+        {
+            "id_categoria": categoria.id_categoria,
+            "nombre": categoria.nombre
+        },
+        status=status.HTTP_201_CREATED
+    )
+
+#edicion de la categoria
+def put(self, request, categoria_id):
+
+    id_restaurante = get_restaurante_from_token(request)
+
+    try:
+        categoria = Categoria.objects.get(
+            pk=categoria_id,
+            id_restaurante=id_restaurante
+        )
+
+    except Categoria.DoesNotExist:
+
+        return Response(
+            {"error": "Categoria no encontrada"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    categoria.nombre = request.data.get(
+        "nombre",
+        categoria.nombre
+    )
+
+    categoria.save()
+
+    return Response({
+        "id_categoria": categoria.id_categoria,
+        "nombre": categoria.nombre
+    })
+
+#esta parte es de categoria pero de agregar y eliminar
+class CategoriaDetailView(APIView):
+
+    def put(self, request, categoria_id):
+        try:
+            categoria = Categoria.objects.get(pk=categoria_id)
+        except Categoria.DoesNotExist:
+            return Response(
+                {"error": "Categoría no encontrada"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        categoria.nombre = request.data.get(
+            "nombre",
+            categoria.nombre
+        )
+
+        categoria.save()
+
+        return Response({
+            "id_categoria": categoria.id_categoria,
+            "nombre": categoria.nombre
+        })
+
+    def delete(self, request, categoria_id):
+        try:
+            categoria = Categoria.objects.get(pk=categoria_id)
+        except Categoria.DoesNotExist:
+            return Response(
+                {"error": "Categoría no encontrada"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        categoria.delete()
+
+        return Response(
+            {"mensaje": "Categoría eliminada"},
+            status=status.HTTP_204_NO_CONTENT
+        )
