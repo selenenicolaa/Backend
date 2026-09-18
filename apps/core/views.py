@@ -121,13 +121,18 @@ class ProductosView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        disponible =request.data.get('disponible', True)
+        
+        if isinstance(disponible, str):
+         disponible = disponible.lower() == 'true'
+
         producto = Productos.objects.create(
             nombre=nombre,
             precio=precio,
             descripcion=request.data.get('descripcion', ''),
             stock=request.data.get('stock', 0),
             imagen_url=request.data.get('imagen_url', ''),
-            disponible=request.data.get('disponible', True),
+            disponible=disponible,
             id_restaurante_id=id_restaurante,  # Viene del token, no del usuario
         )
 
